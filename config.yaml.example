@@ -1,6 +1,7 @@
 {
   "domain": "bla.nl",
-  "server": "hercules"
-  "privatekeypath": "full path including filename to private key"
-  "accountname": "name of transip account"
+  "server": "hercules",
+  "privatekeypath": "full path including filename to private key",
+  "accountname": "name of transip account",
+  "timetolive": 300
 }
