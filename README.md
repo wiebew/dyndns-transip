@@ -1,6 +1,6 @@
 # dyndns-transip
 
-Dyndns script that sets ip address for internet provider transip
+Dyndns script that dynamically sets ip address in DNS records of a domain with internet provider [Transip](https://transip.nl).
 
 This script is meant to let a server detect its own ip address on the internet using `ipify.org` and set that ip address in a transip DNS Entry using the `transip API`
 
@@ -14,7 +14,7 @@ Steps:
 
 ```bash
 cd dyndns-transip
-go get 
+go get
 go build
 ```
 
