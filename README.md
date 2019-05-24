@@ -11,6 +11,16 @@ Steps:
 1. Activate API in the [Transip Portal](https://www.transip.nl/cp/account/api/), store the private key in your .ssh folder
 2. Clone this project on your server
 3. Copy the `config.yaml.example` to `config.yaml` and change the values to reflect your wishes
+
+```yaml
+domain: "bla.nl"
+server: "hercules"
+privatekeypath: "full path including filename to private key"
+accountname: "name of transip account"
+timetolive: 300
+logfile: "./dyndns-transip.log"
+```
+
 4. Make sure golang is installed on your machine, setup GOPATH and GOBIN variables
 5. Do the following commands:
 
