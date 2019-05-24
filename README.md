@@ -1,6 +1,6 @@
 # dyndns-transip
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/wiebew/dyndns-transip)](https://goreportcard.com/report/github.com/wiebew/dyndns-transip) [![Documentation]
+[![Go Report Card](https://goreportcard.com/badge/github.com/wiebew/dyndns-transip)](https://goreportcard.com/report/github.com/wiebew/dyndns-transip)
 
 Dyndns script that dynamically sets ip address in DNS records of a domain with internet provider [Transip](https://transip.nl).
 
