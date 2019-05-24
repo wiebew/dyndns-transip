@@ -1,0 +1,19 @@
+INFO : 2019/05/24 15:52:55.428464 dyndns-transip.go:55: My IP Address: 81.207.137.15
+INFO : 2019/05/24 15:52:55.864294 dyndns-transip.go:135: Found server freenasbla2 in DNS record
+INFO : 2019/05/24 15:52:55.864384 dyndns-transip.go:147: Value of DNS is correct with ip 81.207.137.15, nothing will be changed
+INFO : 2019/05/24 15:53:13.321849 dyndns-transip.go:54: My IP Address: 81.207.137.15
+INFO : 2019/05/24 15:53:13.770896 dyndns-transip.go:134: Found server freenasbla2 in DNS record
+INFO : 2019/05/24 15:53:13.771003 dyndns-transip.go:146: Value of DNS is correct with ip 81.207.137.15, nothing will be changed
+INFO : 2019/05/24 15:54:57.190336 dyndns-transip.go:126: Account: archigogo, Domain: adfero.nl, Server: freenasbla2
+INFO : 2019/05/24 15:54:57.735741 dyndns-transip.go:53: My IP Address: 81.207.137.15
+INFO : 2019/05/24 15:54:58.236800 dyndns-transip.go:135: Found server freenasbla2 in DNS record
+INFO : 2019/05/24 15:54:58.236895 dyndns-transip.go:147: Value of DNS is correct with ip 81.207.137.15, nothing will be changed
+INFO : 2019/05/24 15:56:52.300847 dyndns-transip.go:125: *** Starting dyndns-transip check
+INFO : 2019/05/24 15:56:52.301268 dyndns-transip.go:126: Account: archigogo, Domain: adfero.nl, Server: freenasbla2
+INFO : 2019/05/24 15:56:52.842387 dyndns-transip.go:53: My IP Address: 81.207.137.15
+INFO : 2019/05/24 15:56:53.286597 dyndns-transip.go:135: Found server freenasbla2 in DNS record
+INFO : 2019/05/24 15:56:53.286701 dyndns-transip.go:147: Value of DNS is correct with ip 81.207.137.15, nothing will be changed
+INFO : 2019/05/24 15:57:40.430167 dyndns-transip.go:125: *** Starting dyndns-transip check on Account: archigogo, Domain: adfero.nl, Server: freenasbla2
+INFO : 2019/05/24 15:57:40.980500 dyndns-transip.go:53: My IP Address: 81.207.137.15
+INFO : 2019/05/24 15:57:41.452891 dyndns-transip.go:134: Found server freenasbla2 in DNS record
+INFO : 2019/05/24 15:57:41.452989 dyndns-transip.go:146: Value of DNS is correct with ip 81.207.137.15, nothing will be changed
