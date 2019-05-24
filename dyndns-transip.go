@@ -140,7 +140,7 @@ func main() {
 			if err != nil {
 				panic(err.Error())
 			}
-			logger.Infof("Server %s.%s has now ip adress %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
+			logger.Infof("Server %s.%s has now ip address %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
 
 		} else {
 			logger.Infof("Value of DNS is correct with ip %s, nothing will be changed\n", myIP)
@@ -153,7 +153,7 @@ func main() {
 		if err != nil {
 			panic(err.Error())
 		}
-		logger.Infof("Server %s has been added to DNS record of %s with ip adress %s \n", cfg.Server, cfg.Domain, myIP)
+		logger.Infof("Server %s has been added to DNS record of %s with ip address %s \n", cfg.Server, cfg.Domain, myIP)
 	}
 
 }
