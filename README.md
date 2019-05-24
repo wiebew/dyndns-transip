@@ -20,4 +20,4 @@ go get
 go build
 ```
 
-the result of this will be a binary `dyndns-transip` that you can call from a cronjob. Running this binary will update the ipaddresses opr TTL automatically when they differ from the desired situation.
+the result of this will be a binary `dyndns-transip` that you can call from a cronjob. Running this binary will update the ipaddresses or TTL automatically when they differ from the desired situation.
