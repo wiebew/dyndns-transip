@@ -20,4 +20,4 @@ go get
 go build
 ```
 
-the result of this will be a binary `dyndns-transip` that you can call from a cronjob. Running this binary will update the ipaddresses or TTL automatically when they differ from the desired situation.
+the result of this will be a binary `dyndns-transip` that you can call from a cronjob. Running this binary will update the ipaddress or TTL automatically when they differ from the desired situation. It will preserve the other fields in the DNS Entry and just add the server A record if it does not exist or update the values if the server A record is there.
