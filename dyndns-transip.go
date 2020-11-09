@@ -20,7 +20,7 @@ type conf struct {
 	Server         string `yaml:"server"`
 	PrivateKeyPath string `yaml:"privatekeypath"`
 	AccountName    string `yaml:"accountname"`
-	TimeToLive     int64  `yaml:"timetolive"`
+	TimeToLive     int    `yaml:"timetolive"`
 	LogFile        string `yaml:"logfile"`
 }
 
@@ -55,40 +55,11 @@ func getMyIP() string {
 	return ipifyresult.IP
 }
 
-func getTransIPClient(accountName string, privateKeyPath string) gotransip.SOAPClient {
-	// create new TransIP API SOAP client
-	c, err := gotransip.NewSOAPClient(gotransip.ClientConfig{
-		AccountName:    accountName,
-		PrivateKeyPath: privateKeyPath})
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
-
-	return c
-}
-
-func getDomain(transipAPI gotransip.SOAPClient, domainName string) domain.Domain {
-
-	// Get domain info from Transip
-	dom, err := domain.GetInfo(transipAPI, domainName)
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
-
-	// print info for each DNS Entry
-	// fmt.Print("DNS Entries:\n")
-	// for _, dnsEntry := range dom.DNSEntries {
-	// 	fmt.Printf("Name: %s, TTL: %d, Type: %s, Content: %s \n", dnsEntry.Name, dnsEntry.TTL, dnsEntry.Type, dnsEntry.Content)
-	// }
-
-	return dom
-}
-
 func isCorrectDNSValue(pDNSEntry *domain.DNSEntry, ip string, cfg conf) bool {
-	return (*pDNSEntry).Content == ip && (*pDNSEntry).TTL == cfg.TimeToLive
+	return (*pDNSEntry).Content == ip && (*pDNSEntry).Expire == cfg.TimeToLive
 }
 
-func findDNSEntryForServer(dnsEntries domain.DNSEntries, serverName string) *domain.DNSEntry {
+func findDNSEntryForServer(dnsEntries []domain.DNSEntry, serverName string) *domain.DNSEntry {
 	// search for servername in the dns entries
 	var pServerDNSEntry *domain.DNSEntry
 
@@ -109,7 +80,7 @@ func updateDNSRecord() {
 func main() {
 	var cfg conf
 	var myIP string
-	var transipAPI gotransip.SOAPClient
+	var dnsEntries []domain.DNSEntry
 
 	cfg.getConf()
 	flag.Parse()
@@ -125,18 +96,31 @@ func main() {
 	logger.Infof("*** Starting dyndns-transip check on Account: %s, Domain: %s, Server: %s\n", cfg.AccountName, cfg.Domain, cfg.Server)
 
 	// create soap client for Transip API
-	transipAPI = getTransIPClient(cfg.AccountName, cfg.PrivateKeyPath)
+	transipAPI, err := gotransip.NewClient(gotransip.ClientConfiguration{
+		AccountName:    cfg.AccountName,
+		PrivateKeyPath: cfg.PrivateKeyPath})
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
 	myIP = getMyIP()
-	dom := getDomain(transipAPI, cfg.Domain)
-	pServerDNSEntry := findDNSEntryForServer(dom.DNSEntries, cfg.Server)
+
+	myDomain := domain.Repository{Client: transipAPI}
+
+	dnsEntries, err = myDomain.GetDNSEntries(cfg.Domain)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	pServerDNSEntry := findDNSEntryForServer(dnsEntries, cfg.Server)
 
 	if pServerDNSEntry != nil {
 		logger.Infof("Found server %s in DNS record\n", cfg.Server)
 		if !isCorrectDNSValue(pServerDNSEntry, myIP, cfg) {
 			(*pServerDNSEntry).Content = myIP
-			(*pServerDNSEntry).TTL = cfg.TimeToLive
+			(*pServerDNSEntry).Expire = cfg.TimeToLive
 
-			err := domain.SetDNSEntries(transipAPI, cfg.Domain, dom.DNSEntries)
+			err := myDomain.ReplaceDNSEntries(cfg.Domain, dnsEntries)
 			if err != nil {
 				panic(err.Error())
 			}
@@ -147,9 +131,9 @@ func main() {
 		}
 	} else {
 		logger.Infof("Server %s not found in DNS record\n", cfg.Server)
-		entry := domain.DNSEntry{Name: cfg.Server, TTL: cfg.TimeToLive, Type: domain.DNSEntryTypeA, Content: myIP}
-		dom.DNSEntries = append(dom.DNSEntries, entry)
-		err := domain.SetDNSEntries(transipAPI, cfg.Domain, dom.DNSEntries)
+		entry := domain.DNSEntry{Name: cfg.Server, Expire: cfg.TimeToLive, Type: "A", Content: myIP}
+		dnsEntries = append(dnsEntries, entry)
+		err := myDomain.ReplaceDNSEntries(cfg.Domain, dnsEntries)
 		if err != nil {
 			panic(err.Error())
 		}
