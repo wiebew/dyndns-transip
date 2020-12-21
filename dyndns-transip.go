@@ -28,9 +28,9 @@ type ipify struct {
 	IP string `json:"ip"`
 }
 
-func (c *conf) getConf() *conf {
+func (c *conf) getConf(path *string) *conf {
 
-	yamlFile, err := ioutil.ReadFile("config.yaml")
+	yamlFile, err := ioutil.ReadFile(*path)
 	if err != nil {
 		fmt.Printf("yamlFile.Get err   #%v ", err)
 	}
@@ -82,9 +82,11 @@ func main() {
 	var myIP string
 	var dnsEntries []domain.DNSEntry
 
-	cfg.getConf()
-	flag.Parse()
 	var verbose = flag.Bool("verbose", false, "print info level logs to stdout")
+	var configpath = flag.String("config", "./config.yaml", "path to config.yml file")
+	flag.Parse()
+
+	cfg.getConf(configpath)
 
 	lf, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 	if err != nil {
