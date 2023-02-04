@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/logger"
 
-	"github.com/transip/gotransip"
-	"github.com/transip/gotransip/domain"
+	"github.com/transip/gotransip/v6"
+	"github.com/transip/gotransip/v6/domain"
 	"gopkg.in/yaml.v2"
 )
 
