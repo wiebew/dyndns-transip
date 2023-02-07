@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
-	"github.com/google/logger"
+	"log"
 
 	"github.com/transip/gotransip/v6"
 	"github.com/transip/gotransip/v6/domain"
@@ -46,11 +45,11 @@ func getMyIP() string {
 	var ipifyresult ipify
 	response, err := http.Get("https://api.ipify.org?format=json")
 	if err != nil {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 	data, _ := ioutil.ReadAll(response.Body)
 	json.Unmarshal([]byte(data), &ipifyresult)
-	logger.Infof("My IP Address: %s\n", ipifyresult.IP)
+	log.Printf("My IP Address: %s\n", ipifyresult.IP)
 
 	return ipifyresult.IP
 }
@@ -82,27 +81,19 @@ func main() {
 	var myIP string
 	var dnsEntries []domain.DNSEntry
 
-	var verbose = flag.Bool("verbose", false, "print info level logs to stdout")
 	var configpath = flag.String("config", "./config.yaml", "path to config.yml file")
 	flag.Parse()
 
 	cfg.getConf(configpath)
 
-	lf, err := os.OpenFile(cfg.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
-	if err != nil {
-		logger.Fatalf("Failed to open log file: %v", err)
-	}
-	defer lf.Close()
-
-	defer logger.Init("DynDNSLogger", *verbose, true, lf).Close()
-	logger.Infof("*** Starting dyndns-transip check on Account: %s, Domain: %s, Server: %s\n", cfg.AccountName, cfg.Domain, cfg.Server)
+	log.Printf("*** Starting dyndns-transip check on Account: %s, Domain: %s, Server: %s\n", cfg.AccountName, cfg.Domain, cfg.Server)
 
 	// create soap client for Transip API
 	transipAPI, err := gotransip.NewClient(gotransip.ClientConfiguration{
 		AccountName:    cfg.AccountName,
 		PrivateKeyPath: cfg.PrivateKeyPath})
 	if err != nil {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	myIP = getMyIP()
@@ -111,13 +102,13 @@ func main() {
 
 	dnsEntries, err = myDomain.GetDNSEntries(cfg.Domain)
 	if err != nil {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	pServerDNSEntry := findDNSEntryForServer(dnsEntries, cfg.Server)
 
 	if pServerDNSEntry != nil {
-		logger.Infof("Found server %s in DNS record\n", cfg.Server)
+		log.Printf("Found server %s in DNS record\n", cfg.Server)
 		if !isCorrectDNSValue(pServerDNSEntry, myIP, cfg) {
 			(*pServerDNSEntry).Content = myIP
 			(*pServerDNSEntry).Expire = cfg.TimeToLive
@@ -126,20 +117,19 @@ func main() {
 			if err != nil {
 				panic(err.Error())
 			}
-			logger.Infof("Server %s.%s has now ip address %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
+			log.Printf("Server %s.%s has now ip address %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
 
 		} else {
-			logger.Infof("Value of DNS is correct with ip %s, nothing will be changed\n", myIP)
+			log.Printf("Value of DNS is correct with ip %s, nothing will be changed\n", myIP)
 		}
 	} else {
-		logger.Infof("Server %s not found in DNS record\n", cfg.Server)
+		log.Printf("Server %s not found in DNS record\n", cfg.Server)
 		entry := domain.DNSEntry{Name: cfg.Server, Expire: cfg.TimeToLive, Type: "A", Content: myIP}
 		dnsEntries = append(dnsEntries, entry)
 		err := myDomain.ReplaceDNSEntries(cfg.Domain, dnsEntries)
 		if err != nil {
 			panic(err.Error())
 		}
-		logger.Infof("Server %s has been added to DNS record of %s with ip address %s \n", cfg.Server, cfg.Domain, myIP)
+		log.Printf("Server %s has been added to DNS record of %s with ip address %s \n", cfg.Server, cfg.Domain, myIP)
 	}
-
 }
