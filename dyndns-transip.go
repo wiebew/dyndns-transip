@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-
+	"os"
 	"log"
 
 	"github.com/transip/gotransip/v6"
@@ -85,8 +85,8 @@ func main() {
 	flag.Parse()
 
 	cfg.getConf(configpath)
-
-	log.Printf("*** Starting dyndns-transip check on Account: %s, Domain: %s, Server: %s\n", cfg.AccountName, cfg.Domain, cfg.Server)
+	log.SetOutput(os.Stdout)
+	log.Printf("Check on Account: %s, Domain: %s, Server: %s\n", cfg.AccountName, cfg.Domain, cfg.Server)
 
 	// create soap client for Transip API
 	transipAPI, err := gotransip.NewClient(gotransip.ClientConfiguration{
@@ -117,10 +117,10 @@ func main() {
 			if err != nil {
 				panic(err.Error())
 			}
-			log.Printf("Server %s.%s has now ip address %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
+			log.Printf("Server %s.%s now has ip address %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
 
 		} else {
-			log.Printf("Value of DNS is correct with ip %s, nothing will be changed\n", myIP)
+			log.Printf("DNS entry is correct with IP %s, nothing will be changed\n", myIP)
 		}
 	} else {
 		log.Printf("Server %s not found in DNS record\n", cfg.Server)
@@ -130,6 +130,6 @@ func main() {
 		if err != nil {
 			panic(err.Error())
 		}
-		log.Printf("Server %s has been added to DNS record of %s with ip address %s \n", cfg.Server, cfg.Domain, myIP)
+		log.Printf("Server %s has now been added to DNS record of %s with IP address %s with TTL %d \n", cfg.Server, cfg.Domain, myIP, cfg.TimeToLive)
 	}
 }
