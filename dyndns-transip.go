@@ -21,6 +21,7 @@ type conf struct {
 	AccountName    string `yaml:"accountname"`
 	TimeToLive     int    `yaml:"timetolive"`
 	LogFile        string `yaml:"logfile"`
+	RecordType     string `yaml:"recordtype"`
 }
 
 type ipify struct {
@@ -41,14 +42,25 @@ func (c *conf) getConf(path *string) *conf {
 	return c
 }
 
-func getMyIP() string {
+func getMyIP(version int) string {
+
 	var ipifyresult ipify
-	response, err := http.Get("https://api.ipify.org?format=json")
-	if err != nil {
-		log.Fatal(err.Error())
+
+	if version == 4 { 
+		response, err := http.Get("https://api.ipify.org?format=json")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		data, _ := ioutil.ReadAll(response.Body)
+		json.Unmarshal([]byte(data), &ipifyresult)
+	} else {
+		response, err := http.Get("https://api6.ipify.org?format=json")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		data, _ := ioutil.ReadAll(response.Body)
+		json.Unmarshal([]byte(data), &ipifyresult)
 	}
-	data, _ := ioutil.ReadAll(response.Body)
-	json.Unmarshal([]byte(data), &ipifyresult)
 	log.Printf("My IP Address: %s\n", ipifyresult.IP)
 
 	return ipifyresult.IP
@@ -58,14 +70,14 @@ func isCorrectDNSValue(pDNSEntry *domain.DNSEntry, ip string, cfg conf) bool {
 	return (*pDNSEntry).Content == ip && (*pDNSEntry).Expire == cfg.TimeToLive
 }
 
-func findDNSEntryForServer(dnsEntries []domain.DNSEntry, serverName string) *domain.DNSEntry {
+func findDNSEntryForServer(dnsEntries []domain.DNSEntry, serverName string, recordType string) *domain.DNSEntry {
 	// search for servername in the dns entries
 	var pServerDNSEntry *domain.DNSEntry
 
 	// use idx to get correct reference in dnsEntries array
 	for idx := range dnsEntries {
 		dnsEntry := dnsEntries[idx]
-		if dnsEntry.Name == serverName && dnsEntry.Type == "A" {
+		if dnsEntry.Name == serverName && dnsEntry.Type == recordType {
 			pServerDNSEntry = &dnsEntries[idx]
 		}
 	}
@@ -86,7 +98,7 @@ func main() {
 
 	cfg.getConf(configpath)
 	log.SetOutput(os.Stdout)
-	log.Printf("Check on Account: %s, Domain: %s, Server: %s\n", cfg.AccountName, cfg.Domain, cfg.Server)
+	log.Printf("Check on Account: %s, Domain: %s, Server: %s, RecordType: %s\n", cfg.AccountName, cfg.Domain, cfg.Server, cfg.RecordType)
 
 	// create soap client for Transip API
 	transipAPI, err := gotransip.NewClient(gotransip.ClientConfiguration{
@@ -95,8 +107,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
-	myIP = getMyIP()
+	if cfg.RecordType == "A" {
+		myIP = getMyIP(4)
+	} else {
+		myIP = getMyIP(6)
+	}
 
 	myDomain := domain.Repository{Client: transipAPI}
 
@@ -105,7 +120,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	pServerDNSEntry := findDNSEntryForServer(dnsEntries, cfg.Server)
+	pServerDNSEntry := findDNSEntryForServer(dnsEntries, cfg.Server, cfg.RecordType)
 
 	if pServerDNSEntry != nil {
 		log.Printf("Found server %s in DNS record\n", cfg.Server)
@@ -124,7 +139,7 @@ func main() {
 		}
 	} else {
 		log.Printf("Server %s not found in DNS record\n", cfg.Server)
-		entry := domain.DNSEntry{Name: cfg.Server, Expire: cfg.TimeToLive, Type: "A", Content: myIP}
+		entry := domain.DNSEntry{Name: cfg.Server, Expire: cfg.TimeToLive, Type: cfg.RecordType, Content: myIP}
 		dnsEntries = append(dnsEntries, entry)
 		err := myDomain.ReplaceDNSEntries(cfg.Domain, dnsEntries)
 		if err != nil {
