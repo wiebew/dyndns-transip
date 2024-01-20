@@ -19,6 +19,7 @@ privatekeypath: "full path including filename to private key"
 accountname: "name of transip account"
 timetolive: 300
 logfile: "./dyndns-transip.log"
+recordtype : "A"
 ```
 
 4. Make sure golang is installed on your machine, setup GOPATH and GOBIN variables
